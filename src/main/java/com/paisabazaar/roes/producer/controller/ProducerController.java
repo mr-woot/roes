@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Project: producer
@@ -40,5 +42,10 @@ public class ProducerController {
                 producer.getPurpose(),
                 producer.getMetadata())
         );
+    }
+
+    @PostMapping(value = "/produce_messages", produces = "application/json")
+    public ResponseEntity<?> createProducer(@Valid @RequestBody List<Map<String, Object>> payload, @RequestParam String producerId) {
+        return producerService.produceMessages(producerId, payload);
     }
 }

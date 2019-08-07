@@ -14,6 +14,7 @@ public interface CustomProducerRepository {
 
     /**
      * This function finds Producer by given producerId
+     *
      * @param producerId Producer id (uuid)
      * @return Producer
      */
@@ -21,6 +22,7 @@ public interface CustomProducerRepository {
 
     /**
      * This function finds Producer list by given buName
+     *
      * @param buName BuName
      * @return Producer[]
      */
@@ -28,6 +30,7 @@ public interface CustomProducerRepository {
 
     /**
      * This function finds Producer list by given topic
+     *
      * @param topic Topic
      * @return Producer[]
      */
@@ -35,6 +38,7 @@ public interface CustomProducerRepository {
 
     /**
      * This function checks if te given Producer id exists
+     *
      * @param producerId Producer id
      * @return boolean
      */

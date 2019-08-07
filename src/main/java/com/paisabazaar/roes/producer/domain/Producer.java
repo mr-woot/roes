@@ -45,18 +45,8 @@ public class Producer implements Serializable {
     @Column(name = "created_at", nullable = false)
     private Long createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now().toEpochMilli();
-        this.updatedAt = Instant.now().toEpochMilli();
+    public Producer() {
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now().toEpochMilli();
-    }
-
-    public Producer() { }
 
     public Producer(String buName, String type, String topic, String purpose, String metadata) {
         super();
@@ -66,6 +56,17 @@ public class Producer implements Serializable {
         this.topic = topic;
         this.purpose = purpose;
         this.metadata = metadata;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now().toEpochMilli();
+        this.updatedAt = Instant.now().toEpochMilli();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now().toEpochMilli();
     }
 
     public Long getId() {

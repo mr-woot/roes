@@ -3,7 +3,6 @@ package com.paisabazaar.roes.producer.payload;
 import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**

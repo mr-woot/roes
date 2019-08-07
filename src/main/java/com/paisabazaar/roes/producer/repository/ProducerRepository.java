@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
  * On: 2019-08-07 | 17:36
  */
 @Repository
-public interface ProducerRepository extends JpaRepository<Producer, Long>, CustomProducerRepository { }
+public interface ProducerRepository extends JpaRepository<Producer, Long>, CustomProducerRepository {
+}

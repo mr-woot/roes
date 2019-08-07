@@ -24,7 +24,8 @@ public class ProducerRequest {
     @NotNull(message = "metadata cannot be empty")
     private String metadata;
 
-    public ProducerRequest() { }
+    public ProducerRequest() {
+    }
 
     public ProducerRequest(@NotNull(message = "buName cannot be empty") String buName,
                            @NotNull(message = "topic cannot be empty") String topic,

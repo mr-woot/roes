@@ -29,7 +29,6 @@ public class ProducerController {
 
     @GetMapping(value = "/producer", produces = "application/json")
     public ResponseEntity<?> getProducer(@Valid @RequestParam String producerId) {
-        log.info("test info log .");
         return producerService.getProducer(producerId);
     }
 

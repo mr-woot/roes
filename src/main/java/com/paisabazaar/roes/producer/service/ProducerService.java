@@ -57,7 +57,7 @@ public class ProducerService {
         if (payload.size() == 0) {
             throw new PayloadEmptyException("Expect payload to be array of messages");
         } else {
-            Optional<Producer> optional = Optional.empty();
+            Optional<Producer> optional;
             /*
                 Check if producer exists in in-memory, if not then check in mysql, if it exists in mysql,
                 fetch it and insert into in-memory and then produce to kafka.
@@ -69,7 +69,7 @@ public class ProducerService {
                 // ## produce to kafka
                 log.info("Produced to kafka");
             } else {
-                // ## insert into cache config map
+                // ## not present in cache, insert into cache config map from mysql
                 optional = producerRepository.findByProducerId(producerId);
                 if (optional.isPresent()) {
                     cacheMap.put(optional.get().getProducerId(), optional.get());

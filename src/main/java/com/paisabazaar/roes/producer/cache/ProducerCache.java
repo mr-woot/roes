@@ -1,13 +1,13 @@
 package com.paisabazaar.roes.producer.cache;
 
-import com.google.gson.Gson;
 import com.paisabazaar.roes.producer.domain.Producer;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.log4j.Log4j2;
+import org.json.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project: producer
@@ -17,10 +17,10 @@ import java.util.Map;
 @Log4j2
 public class ProducerCache {
     private static ProducerCache producerCache;
-    private static Map<String, Object> producerIdsMap;
+    private static Map<String, Producer> producerIdsMap;
 
     private ProducerCache(HikariDataSource dataSource) {
-        producerIdsMap = new LinkedHashMap<>();
+        producerIdsMap = new ConcurrentHashMap<>();
         this.init(dataSource);
     }
 
@@ -47,10 +47,10 @@ public class ProducerCache {
             producerIdsMap.put(p.getProducerId(), p);
             return null;
         });
-        log.info("ProducersMap=" + new Gson().toJson(producerIdsMap));
+        log.info("ProducersMap=" + new JSONObject(producerIdsMap).toString(4));
     }
 
-    public Map<String, Object> getProducerIdsMap() {
+    public Map<String, Producer> getProducerIdsMap() {
         return producerIdsMap;
     }
 }

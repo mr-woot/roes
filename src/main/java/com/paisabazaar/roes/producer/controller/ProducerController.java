@@ -1,6 +1,7 @@
 package com.paisabazaar.roes.producer.controller;
 
 import com.paisabazaar.roes.producer.domain.Producer;
+import com.paisabazaar.roes.producer.exception.types.MethodArgumentEmptyException;
 import com.paisabazaar.roes.producer.payload.ProducerRequest;
 import com.paisabazaar.roes.producer.service.ProducerService;
 import lombok.extern.log4j.Log4j2;
@@ -44,7 +45,19 @@ public class ProducerController {
     }
 
     @PostMapping(value = "/produce_messages", produces = "application/json")
-    public ResponseEntity<?> createProducer(@Valid @RequestBody List<Map<String, Object>> payload, @RequestParam String producerId) {
-        return producerService.produceMessages(producerId, payload);
+    public ResponseEntity<?> produceMessages(@Valid @RequestBody List<Map<String, Object>> payload,
+                                            @RequestHeader(value = "x-producer-id", required = false) String id,
+                                            @RequestParam(value = "producer_id", required = false) String producerId,
+                                            @RequestParam(value = "key", required = false) String key,
+                                            @RequestParam(value = "partition", required = false) Integer partition) {
+        String ID;
+        if (id == null && producerId == null) {
+            throw new MethodArgumentEmptyException("Required header x-producer-id not present");
+        } else if (id != null) {
+            ID = id;
+        } else {
+            ID = producerId;
+        }
+        return producerService.produceMessages(ID, payload, partition, key);
     }
 }

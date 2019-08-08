@@ -1,10 +1,10 @@
 package com.paisabazaar.roes.kafka.config;
 
-import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,14 +16,9 @@ import org.springframework.kafka.core.ProducerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Project: producer
- * Contributed By: Tushar Mudgal
- * On: 2019-08-08 | 10:25
- */
 @Configuration
 @Log4j2
-public class KafkaConfiguration {
+public class KafkaConfig {
     @Value(value = "${kafka.bootstrapAddress}")
     private String bootstrapAddress;
 
@@ -44,7 +39,6 @@ public class KafkaConfiguration {
 
     @Value(value = "${kafka.bufferMemory}")
     private String bufferMemory;
-
 
     @Value(value = "${kafka.compressionType}")
     private String compressionType;
@@ -67,7 +61,7 @@ public class KafkaConfiguration {
         configProps.put(
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 StringSerializer.class);
-        // producer value serializer
+        // produer value serializer
         configProps.put(
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 StringSerializer.class);
@@ -85,7 +79,9 @@ public class KafkaConfiguration {
         configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, bufferMemory);
         // exactly once
         configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, compressionType);
-        log.debug("Kafka Configuration --- " + new Gson().toJson(configProps));
+
+        log.debug("Kafka Configuration --- " + new JSONObject(configProps).toString(4));
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
@@ -95,3 +91,4 @@ public class KafkaConfiguration {
     }
 
 }
+

@@ -1,5 +1,6 @@
 package com.paisabazaar.roes.producer.exception;
 
+import com.paisabazaar.roes.producer.exception.types.MethodArgumentEmptyException;
 import com.paisabazaar.roes.producer.exception.types.PayloadEmptyException;
 import com.paisabazaar.roes.producer.exception.types.ResourceNotFoundException;
 import com.paisabazaar.roes.producer.payload.ApiError;
@@ -157,7 +158,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    @ExceptionHandler(PayloadEmptyException.class)
+    @ExceptionHandler({ PayloadEmptyException.class, MethodArgumentEmptyException.class })
     public ResponseEntity<Object> handlePayloadEmptyException(final ResourceNotFoundException ex, final WebRequest request) {
         logger.info(ex.getClass().getName());
         logger.error("error", ex);
@@ -165,5 +166,4 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, error, error);
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
-
 }

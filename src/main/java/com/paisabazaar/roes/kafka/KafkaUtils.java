@@ -18,7 +18,7 @@ public interface KafkaUtils {
      * @param metadata (Optional)   Used for validating payload messages with the schema. // ## TODO
      * @return String[]             Array of Message Ids produced to kafka
      */
-    String[] produceMessages(List<Map<String, Object>> payload, String key, int partition, String metadata);
+    List<String> produceMessages(List<Map<String, Object>> payload, String topic, Integer partition, String key, String metadata);
 
     /**
      * This function produces messages to kafka
@@ -28,5 +28,5 @@ public interface KafkaUtils {
      * @param metadata (Optional)   Used for validating payload messages with the schema. // ## TODO
      * @return String               Message Id produced to kafka
      */
-    String produceMessages(Map<String, Object> payload, String key, int partition, String metadata);
+    String produceMessages(Map<String, Object> payload, String topic, Integer partition, String key, String metadata);
 }

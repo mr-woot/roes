@@ -1,0 +1,8 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{YYYY-MM-dd HH:mm:ss.SSS}  %green(TOMCAT) --- [%a] [%r] Status %s [%D ms]</pattern>
+        </encoder>
+    </appender>
+    <appender-ref ref="CONSOLE"/>
+</configuration>

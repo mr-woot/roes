@@ -1,15 +1,12 @@
 package com.paisabazaar.roes;
 
-import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-@EnableAsync
-@Log4j2
-public class ProducerApplication {
+public class RoesApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
-        SpringApplication.run(ProducerApplication.class, args);
+        SpringApplication.run(RoesApplication.class, args);
     }
 }

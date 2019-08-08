@@ -4,7 +4,7 @@
     <!-- Logging Properties -->
     <Properties>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
-        <Property name="APP_LOG_ROOT">/Users/tusharmudgal/Desktop/logs</Property>
+        <Property name="APP_LOG_ROOT">/home/tushar/Desktop/logs</Property>
     </Properties>
 
     <Appenders>

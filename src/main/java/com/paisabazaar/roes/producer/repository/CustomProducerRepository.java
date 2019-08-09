@@ -21,6 +21,14 @@ public interface CustomProducerRepository {
     Optional<Producer> findByProducerId(String producerId);
 
     /**
+     * This function finds Producer list by given topic
+     *
+     * @param topic Topic
+     * @return Producer
+     */
+    Optional<Producer> findByTopic(String topic);
+
+    /**
      * This function finds Producer list by given buName
      *
      * @param buName BuName
@@ -29,18 +37,18 @@ public interface CustomProducerRepository {
     Optional<List<Producer>> findAllByBuName(String buName);
 
     /**
-     * This function finds Producer list by given topic
-     *
-     * @param topic Topic
-     * @return Producer[]
-     */
-    Optional<List<Producer>> findAllByTopic(String topic);
-
-    /**
      * This function checks if te given Producer id exists
      *
      * @param producerId Producer id
      * @return boolean
      */
     boolean existsByProducerId(String producerId);
+
+    /**
+     * This function checks if te given Topic exists
+     *
+     * @param topic Topic
+     * @return boolean
+     */
+    boolean existsByTopic(String topic);
 }

@@ -1,6 +1,5 @@
 package com.paisabazaar.roes.producer.controller;
 
-import com.paisabazaar.roes.producer.domain.Producer;
 import com.paisabazaar.roes.producer.exception.types.MethodArgumentEmptyException;
 import com.paisabazaar.roes.producer.payload.ProducerRequest;
 import com.paisabazaar.roes.producer.service.ProducerService;
@@ -35,13 +34,7 @@ public class ProducerController {
 
     @PostMapping(value = "/producer", produces = "application/json")
     public ResponseEntity<?> createProducer(@Valid @RequestBody ProducerRequest producer) {
-        return producerService.createProducer(new Producer(
-                producer.getBuName(),
-                producer.getType(),
-                producer.getTopic(),
-                producer.getPurpose(),
-                producer.getMetadata())
-        );
+        return producerService.createProducer(producer);
     }
 
     @PostMapping(value = "/produce_messages", produces = "application/json")

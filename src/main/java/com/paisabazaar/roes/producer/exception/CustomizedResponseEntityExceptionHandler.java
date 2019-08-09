@@ -1,8 +1,6 @@
 package com.paisabazaar.roes.producer.exception;
 
-import com.paisabazaar.roes.producer.exception.types.MethodArgumentEmptyException;
-import com.paisabazaar.roes.producer.exception.types.PayloadEmptyException;
-import com.paisabazaar.roes.producer.exception.types.ResourceNotFoundException;
+import com.paisabazaar.roes.producer.exception.types.*;
 import com.paisabazaar.roes.producer.payload.ApiError;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -158,11 +156,29 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<Object> handleResourceAlreadyExistsException(final ResourceAlreadyExistsException ex, final WebRequest request) {
+        logger.info(ex.getClass().getName());
+        logger.error("error", ex);
+        String error = ex.getLocalizedMessage() + " already exists";
+        final ApiError apiError = new ApiError(HttpStatus.CONFLICT, error, error);
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
     @ExceptionHandler({ PayloadEmptyException.class, MethodArgumentEmptyException.class })
     public ResponseEntity<Object> handlePayloadEmptyException(final ResourceNotFoundException ex, final WebRequest request) {
         logger.info(ex.getClass().getName());
         logger.error("error", ex);
         String error = ex.getLocalizedMessage();
+        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, error, error);
+        return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    @ExceptionHandler({ InvalidStateException.class })
+    public ResponseEntity<Object> handleInvalidStateException(final InvalidStateException ex, final WebRequest request) {
+        logger.info(ex.getClass().getName());
+        logger.error("error", ex);
+        String error = ex.getLocalizedMessage() + " invalid";
         final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, error, error);
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }

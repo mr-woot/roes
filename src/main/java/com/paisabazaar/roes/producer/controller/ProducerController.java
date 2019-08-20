@@ -1,5 +1,6 @@
 package com.paisabazaar.roes.producer.controller;
 
+import com.paisabazaar.roes.producer.domain.Producer;
 import com.paisabazaar.roes.producer.exception.types.MethodArgumentEmptyException;
 import com.paisabazaar.roes.producer.payload.ProducerRequest;
 import com.paisabazaar.roes.producer.service.ProducerService;
@@ -28,17 +29,27 @@ public class ProducerController {
     }
 
     @GetMapping(value = "/producer", produces = "application/json")
-    public ResponseEntity<?> getProducer(@Valid @RequestParam String producerId) {
+    public ResponseEntity getProducer(@Valid @RequestParam(required = false) String producerId) {
         return producerService.getProducer(producerId);
     }
 
     @PostMapping(value = "/producer", produces = "application/json")
-    public ResponseEntity<?> createProducer(@Valid @RequestBody ProducerRequest producer) {
+    public ResponseEntity createProducer(@Valid @RequestBody ProducerRequest producer) {
         return producerService.createProducer(producer);
     }
 
+    @PutMapping(value = "/producer/{id}", produces = "application/json")
+    public ResponseEntity updateProducer(@PathVariable String id, @RequestBody Producer payload) {
+        return producerService.updateProducer(id, payload);
+    }
+
+    @DeleteMapping(value = "/producer/{id}", produces = "application/json")
+    public ResponseEntity deleteProducer(@PathVariable String id) {
+        return producerService.deleteProducer(id);
+    }
+
     @PostMapping(value = "/produce_messages", produces = "application/json")
-    public ResponseEntity<?> produceMessages(@Valid @RequestBody List<Map<String, Object>> payload,
+    public ResponseEntity produceMessages(@Valid @RequestBody List<Map<String, Object>> payload,
                                             @RequestHeader(value = "x-producer-id", required = false) String id,
                                             @RequestParam(value = "producer_id", required = false) String producerId,
                                             @RequestParam(value = "key", required = false) String key,

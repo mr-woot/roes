@@ -1,7 +1,6 @@
 package com.paisabazaar.roes.producer.domain;
 
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Contributed By: Tushar Mudgal
@@ -18,8 +17,6 @@ public class Response {
 
     private Object error;
 
-    private String messageId;
-
     public Response(String status, int code, Object data, String message) {
         this.status = status;
         this.code = code;
@@ -29,14 +26,12 @@ public class Response {
             this.data = data;
         }
         this.message = message;
-        this.messageId = UUID.randomUUID().toString();
     }
 
     public Response(String status, int code, Object error) {
         this.status = status;
         this.code = code;
         this.error = error;
-        this.messageId = UUID.randomUUID().toString();
     }
 
     @Override
@@ -47,7 +42,6 @@ public class Response {
                 ", data=" + data +
                 ", message='" + message + '\'' +
                 ", error=" + error +
-                ", messageId='" + messageId + '\'' +
                 '}';
     }
 }

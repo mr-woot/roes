@@ -1,6 +1,7 @@
 package com.paisabazaar.roes.kafka.impl;
 
 import com.paisabazaar.roes.kafka.KafkaUtils;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONObject;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.*;
  * On: 2019-08-08 | 10:16
  */
 @Service
+@Log4j2
 public class KafkaUtilsImpl implements KafkaUtils {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
@@ -25,6 +27,7 @@ public class KafkaUtilsImpl implements KafkaUtils {
         JSONObject obj = new JSONObject();
         obj.put("MessageID", messageId);
         obj.put("Payload", message);
+        // ## See if we could make it synchronous
         kafkaTemplate.send(topicName, partition, key, String.valueOf(obj));
         return messageId;
     }

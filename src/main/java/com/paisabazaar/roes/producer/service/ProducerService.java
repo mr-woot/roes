@@ -1,14 +1,17 @@
 package com.paisabazaar.roes.producer.service;
 
+import com.google.gson.Gson;
 import com.paisabazaar.roes.kafka.KafkaUtils;
 import com.paisabazaar.roes.producer.cache.CacheConfig;
 import com.paisabazaar.roes.producer.domain.Producer;
+import com.paisabazaar.roes.producer.domain.Response;
 import com.paisabazaar.roes.producer.exception.types.InvalidStateException;
 import com.paisabazaar.roes.producer.exception.types.PayloadEmptyException;
 import com.paisabazaar.roes.producer.exception.types.ResourceAlreadyExistsException;
 import com.paisabazaar.roes.producer.exception.types.ResourceNotFoundException;
 import com.paisabazaar.roes.producer.payload.ProducerRequest;
 import com.paisabazaar.roes.producer.repository.ProducerRepository;
+import com.paisabazaar.roes.producer.utils.ResponseCode;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -27,46 +31,38 @@ import java.util.Optional;
 @Service
 @Log4j2
 public class ProducerService {
-
+    private final ApplicationUtils applicationUtilsService;
     private final KafkaUtils kafkaUtils;
-
     private final CacheConfig cacheConfig;
-
     private final ProducerRepository producerRepository;
 
-    public ProducerService(ProducerRepository producerRepository, CacheConfig cacheConfig, KafkaUtils kafkaUtils) {
+    public ProducerService(ApplicationUtils applicationUtilsService, ProducerRepository producerRepository, CacheConfig cacheConfig, KafkaUtils kafkaUtils) {
+        this.applicationUtilsService = applicationUtilsService;
         this.producerRepository = producerRepository;
         this.cacheConfig = cacheConfig;
         this.kafkaUtils = kafkaUtils;
     }
 
     public ResponseEntity getProducer(String producerId) {
-        Optional<Producer> producer = producerRepository.findByProducerId(producerId);
-        if (producer.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(producer);
+        if (producerId == null || Objects.equals(producerId, "")) {
+            return ResponseEntity.status(HttpStatus.OK).body(producerRepository.findAll());
         } else {
-            throw new ResourceNotFoundException("Producer id: " + producerId);
+            Optional<Producer> producer = producerRepository.findByProducerId(producerId);
+            if (producer.isPresent()) {
+                return ResponseEntity.status(HttpStatus.OK).body(producer);
+            } else {
+                throw new ResourceNotFoundException("Producer id: " + producerId);
+            }
         }
-    }
-
-    private boolean isValidTopic(String s) {
-//        return Pattern.matches("^com.paisabazaar.([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+)$", s);
-        return s.matches("^com.paisabazaar.([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+)$");
-    }
-
-    private boolean isValidBuNameTypeToTopic(ProducerRequest producerRequest) {
-        String buNameDotType = producerRequest.getBuName() + "." + producerRequest.getType();
-        String tBuNameDotType = producerRequest.getTopic().substring(16);
-        return tBuNameDotType.equals(buNameDotType);
     }
 
     public ResponseEntity createProducer(ProducerRequest producerRequest) {
         // Check if topic matches the regex
-        if (!isValidTopic(producerRequest.getTopic())) {
+        if (!applicationUtilsService.isValidTopic(producerRequest.getTopic())) {
             throw new InvalidStateException("Topic format");
         }
         // Check if buName.type equals com.paisabazaar.[buName].[type]
-        if (!isValidBuNameTypeToTopic(producerRequest)) {
+        if (!applicationUtilsService.isValidBuNameTypeToTopic(producerRequest)) {
             throw new InvalidStateException("buName and type should match com.paisabazaar.(buName).(type). Format");
         }
         // Check if topic already exists
@@ -91,7 +87,7 @@ public class ProducerService {
         if (payload.size() == 0) {
             throw new PayloadEmptyException("Expect payload to be array of messages");
         } else {
-            List<String> messageIds;
+            List<String> messageIds = null;
             Optional<Producer> optional;
             /*
                 Check if producer exists in in-memory, if not then check in mysql, if it exists in mysql,
@@ -104,7 +100,6 @@ public class ProducerService {
                 // produce to kafka
                 Producer p = cacheMap.get(producerId);
                 messageIds = kafkaUtils.produceMessages(payload, p.getTopic(), partition, key, p.getMetadata());
-                log.info("Produced to kafka");
             } else {
                 // not present in cache, insert into cache config map from mysql
                 optional = producerRepository.findByProducerId(producerId);
@@ -119,14 +114,78 @@ public class ProducerService {
                     throw new ResourceNotFoundException("Producer id: " + producerId);
                 }
             }
-            // Response build
-            JSONObject response = new JSONObject();
-            response.put("success", HttpStatus.OK.value());
-            response.put("data", messageIds);
-            response.put("message", messageIds.size() > 1 ? "Messages produced" : "Message produced");
-            log.info(response.put("producerId", producerId).toString(4));
-            return ResponseEntity.status(200).body(response.toMap());
+            String message = null;
+            if (messageIds != null) {
+                message = messageIds.size() > 1 ? "Messages produced" : "Message produced";
+                Response response = new Response("success", HttpStatus.OK.value(), messageIds, message);
+                log.info("producerId: " + producerId + " | " + response);
+                return ResponseEntity.status(200).body(new Gson().toJson(response));
+            } else {
+                log.error(producerId + " | " + "MessageIds empty - [429]");
+                return ResponseEntity.status(429).body(null);
+            }
         }
     }
 
+    public ResponseEntity updateProducer(String producerId, Producer payload) {
+        // Update producer
+        if (!producerRepository.existsByProducerId(producerId)) {
+            Response response = new Response(
+                    "error",
+                    ResponseCode.PRODUCER_NOT_RETRIEVED.getCode(),
+                    ResponseCode.PRODUCER_NOT_RETRIEVED.getMessage()
+            );
+            log.error("Producer not found with id: " + producerId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Gson().toJson(response));
+        } else {
+            Optional<Producer> optional = producerRepository.findByProducerId(producerId);
+            if (optional.isPresent()) {
+                Producer producer = optional.get();
+                applicationUtilsService.copyNonNullProperties(payload, producer);
+                producerRepository.save(producer);
+                log.info("Producer updated with id: " + producer.getProducerId());
+                // Update in producerIdsMap
+                Map<String, Producer> cacheMap = cacheConfig.getProducerCache().getProducerIdsMap();
+                cacheMap.put(producerId, producer);
+                log.info("ProducersMap=" + new JSONObject(cacheMap).toString(4));
+            } else {
+                throw new ResourceNotFoundException("Producer id: " + producerId);
+            }
+            Response response = new Response(
+                    "success",
+                    HttpStatus.CREATED.value(),
+                    producerId,
+                    "Producer updated for id: " + producerId
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Gson().toJson(response));
+        }
+    }
+
+    public ResponseEntity deleteProducer(String producerId) {
+        // If producerId exists
+        if (producerRepository.existsByProducerId(producerId)) {
+            // delete producer by producerId
+            producerRepository.deleteByProducerId(producerId);
+            // Delete in producerIdsMap too
+            cacheConfig.getProducerCache().getProducerIdsMap().remove(producerId);
+            log.info("Producer deleted with id: " + producerId);
+            log.info("ProducersMap=" + cacheConfig.getProducerCache().getProducerIdsMap());
+        } else if (cacheConfig.getProducerCache().getProducerIdsMap().containsKey(producerId)) {
+            // if it not exists in mysql but exists in cache
+            // delete producer mapping from cache
+            cacheConfig.getProducerCache().getProducerIdsMap().remove(producerId);
+            log.info("Invalid mapping of producerId: " + producerId +
+                    " exists only in application cache. Deleting it.");
+            log.info("ProducersMap=" + new JSONObject(cacheConfig.getProducerCache().getProducerIdsMap()).toString(4));
+        } else {
+            log.error("Producer not found with id: " + producerId);
+            Response response = new Response(
+                    "error",
+                    ResponseCode.PRODUCER_NOT_RETRIEVED.getCode(),
+                    ResponseCode.PRODUCER_NOT_RETRIEVED.getMessage()
+            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Gson().toJson(response));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 }

@@ -1,6 +1,7 @@
 package com.paisabazaar.roes.producer.repository;
 
 import com.paisabazaar.roes.producer.domain.Producer;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,4 +52,11 @@ public interface CustomProducerRepository {
      * @return boolean
      */
     boolean existsByTopic(String topic);
+
+    /**
+     * This function deletes Producer record by given producerId
+     * @param producerId Producer id
+     */
+    @Transactional
+    void deleteByProducerId(String producerId);
 }
